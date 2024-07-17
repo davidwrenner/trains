@@ -1,0 +1,35 @@
+name: Build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "*" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Java 22
+      uses: actions/setup-java@v4
+      with:
+        java-version: '22'
+        distribution: 'graalvm'
+        cache: maven
+
+    - name: Install Xvfb # to run graphics tests
+      run: sudo apt-get update && sudo apt-get install -y xvfb
+
+    - name: Start Xvfb
+      run: |
+        Xvfb :99 -screen 0 1024x768x16 &
+        export DISPLAY=:99
+      shell: bash
+
+    - name: Build with Maven
+      run: mvn clean package
+      env:
+        DISPLAY: :99
