@@ -12,12 +12,50 @@ public final class StationPixel implements Pixel {
     private final int w;
     private final Color color;
 
-    StationPixel(int x, int y, int w, int h) {
-        this.x = x;
-        this.y = y;
-        this.w = w;
-        this.h = h;
+    StationPixel(StationPixelBuilder builder) {
+        this.x = builder.x;
+        this.y = builder.y;
+        this.w = builder.w;
+        this.h = builder.h;
         this.color = Color.WHITE;
+    }
+
+    public static StationPixelBuilder builder() {
+        return new StationPixelBuilder();
+    }
+
+    public static class StationPixelBuilder {
+
+        private int x;
+        private int y;
+        private int w;
+        private int h;
+
+        StationPixelBuilder() {}
+
+        public StationPixelBuilder x(int x) {
+            this.x = x;
+            return this;
+        }
+
+        public StationPixelBuilder y(int y) {
+            this.y = y;
+            return this;
+        }
+
+        public StationPixelBuilder w(int w) {
+            this.w = w;
+            return this;
+        }
+
+        public StationPixelBuilder h(int h) {
+            this.h = h;
+            return this;
+        }
+
+        public StationPixel build() {
+            return new StationPixel(this);
+        }
     }
 
     @Override
