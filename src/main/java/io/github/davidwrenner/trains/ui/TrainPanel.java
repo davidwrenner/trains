@@ -75,19 +75,19 @@ public class TrainPanel extends JPanel implements ActionListener {
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        Graphics2D g2d = (Graphics2D) g;
         refreshGrid();
-        drawGrid(g2d);
+        drawGrid((Graphics2D) g);
     }
 
     public void emptyGrid() {
         for (int i = 0; i < this.grid.length; ++i) {
             for (int j = 0; j < this.grid[0].length; ++j) {
-                this.grid[i][j] = new EmptyPixel(
-                        j * Constants.PIXEL_WIDTH,
-                        (this.grid.length - i - 1) * Constants.PIXEL_WIDTH,
-                        Constants.PIXEL_WIDTH,
-                        Constants.PIXEL_WIDTH);
+                this.grid[i][j] = EmptyPixel.builder()
+                        .x(j * Constants.PIXEL_WIDTH)
+                        .y((this.grid.length - i - 1) * Constants.PIXEL_WIDTH)
+                        .w(Constants.PIXEL_WIDTH)
+                        .h(Constants.PIXEL_WIDTH)
+                        .build();
             }
         }
     }
@@ -102,11 +102,12 @@ public class TrainPanel extends JPanel implements ActionListener {
                 continue;
             }
             final Coordinate coordinate = this.stationCoordinates.get(station.code());
-            this.grid[coordinate.y()][coordinate.x()] = new StationPixel(
-                    coordinate.x() * Constants.PIXEL_WIDTH,
-                    (this.grid.length - coordinate.y() - 1) * Constants.PIXEL_WIDTH,
-                    Constants.PIXEL_WIDTH,
-                    Constants.PIXEL_WIDTH);
+            this.grid[coordinate.y()][coordinate.x()] = StationPixel.builder()
+                    .x(coordinate.x() * Constants.PIXEL_WIDTH)
+                    .y((this.grid.length - coordinate.y() - 1) * Constants.PIXEL_WIDTH)
+                    .w(Constants.PIXEL_WIDTH)
+                    .h(Constants.PIXEL_WIDTH)
+                    .build();
         }
 
         for (TrainPosition trainPosition : trainPositions.trainPositions()) {
@@ -118,12 +119,13 @@ public class TrainPanel extends JPanel implements ActionListener {
                 // this could be expected to occur when a train is not on a StandardRoute
                 continue;
             }
-            this.grid[coordinate.y()][coordinate.x()] = new TrainPixel(
-                    trainPosition.lineCode(),
-                    coordinate.x() * Constants.PIXEL_WIDTH,
-                    (this.grid.length - coordinate.y() - 1) * Constants.PIXEL_WIDTH,
-                    Constants.PIXEL_WIDTH,
-                    Constants.PIXEL_WIDTH);
+            this.grid[coordinate.y()][coordinate.x()] = TrainPixel.builder()
+                    .lineCode(trainPosition.lineCode())
+                    .x(coordinate.x() * Constants.PIXEL_WIDTH)
+                    .y((this.grid.length - coordinate.y() - 1) * Constants.PIXEL_WIDTH)
+                    .w(Constants.PIXEL_WIDTH)
+                    .h(Constants.PIXEL_WIDTH)
+                    .build();
         }
     }
 

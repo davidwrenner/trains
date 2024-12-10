@@ -13,12 +13,50 @@ public final class EmptyPixel implements Pixel {
     private final int w;
     private final Color color;
 
-    EmptyPixel(int x, int y, int w, int h) {
-        this.x = x;
-        this.y = y;
-        this.w = w;
-        this.h = h;
+    EmptyPixel(EmptyPixelBuilder builder) {
+        this.x = builder.x;
+        this.y = builder.y;
+        this.w = builder.w;
+        this.h = builder.h;
         this.color = Constants.DARKER_GREY;
+    }
+
+    public static EmptyPixelBuilder builder() {
+        return new EmptyPixelBuilder();
+    }
+
+    public static class EmptyPixelBuilder {
+
+        private int x;
+        private int y;
+        private int w;
+        private int h;
+
+        EmptyPixelBuilder() {}
+
+        public EmptyPixelBuilder x(int x) {
+            this.x = x;
+            return this;
+        }
+
+        public EmptyPixelBuilder y(int y) {
+            this.y = y;
+            return this;
+        }
+
+        public EmptyPixelBuilder w(int w) {
+            this.w = w;
+            return this;
+        }
+
+        public EmptyPixelBuilder h(int h) {
+            this.h = h;
+            return this;
+        }
+
+        public EmptyPixel build() {
+            return new EmptyPixel(this);
+        }
     }
 
     @Override
