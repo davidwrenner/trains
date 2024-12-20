@@ -4,6 +4,7 @@ package io.github.davidwrenner.trains;
 import io.github.davidwrenner.trains.config.Constants;
 import io.github.davidwrenner.trains.ui.TrainFrame;
 import io.github.davidwrenner.trains.ui.TrainPanel;
+import java.awt.*;
 import javax.swing.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,11 +32,16 @@ public class Application {
     }
 
     private void initializeUI() {
+        TrainPanel panel = new TrainPanel();
+        panel.setName("TrainPanel");
+        panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        panel.setPreferredSize(new Dimension(Constants.WIDTH_PX, Constants.HEIGHT_PX));
+
         frame = new TrainFrame();
         frame.setTitle("Trains");
         frame.setBackground(Constants.DARKER_GREY);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.add(new TrainPanel());
+        frame.add(panel);
         frame.pack();
         frame.setVisible(true);
     }
