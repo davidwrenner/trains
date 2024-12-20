@@ -40,9 +40,6 @@ public class TrainPanel extends JPanel implements ActionListener {
 
     public TrainPanel() {
         super();
-        this.setName("TrainPanel");
-        this.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        this.setPreferredSize(new Dimension(Constants.WIDTH_PX, Constants.HEIGHT_PX));
 
         this.projector = new Projector();
         this.trainPositionService = new TrainPositionService();
