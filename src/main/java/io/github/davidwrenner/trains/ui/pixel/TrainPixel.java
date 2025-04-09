@@ -1,7 +1,6 @@
 /* * * * * Copyright (c) 2024 David Wrenner * * * * */
-package io.github.davidwrenner.trains.ui;
+package io.github.davidwrenner.trains.ui.pixel;
 
-import io.github.davidwrenner.trains.config.Constants;
 import io.github.davidwrenner.trains.pojo.LineCode;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -19,18 +18,7 @@ public final class TrainPixel implements Pixel {
         this.y = builder.y;
         this.w = builder.w;
         this.h = builder.h;
-        this.color = initializeColor(builder.lineCode);
-    }
-
-    private Color initializeColor(LineCode lineCode) {
-        return switch (lineCode) {
-            case RD -> Color.RED;
-            case YL -> Color.YELLOW;
-            case GR -> Color.GREEN;
-            case BL -> Constants.BRIGHTER_BLUE;
-            case OR -> Constants.DARKER_ORANGE;
-            case SV -> Constants.SILVER;
-        };
+        this.color = builder.lineCode.toColor();
     }
 
     public static TrainPixelBuilder builder() {

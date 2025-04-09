@@ -1,5 +1,5 @@
 /* * * * * Copyright (c) 2024 David Wrenner * * * * */
-package io.github.davidwrenner.trains.ui;
+package io.github.davidwrenner.trains.ui.pixel;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

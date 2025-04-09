@@ -1,8 +1,10 @@
 /* * * * * Copyright (c) 2024 David Wrenner * * * * */
 package io.github.davidwrenner.trains;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.awt.*;
 import javax.swing.*;
 import org.assertj.swing.edt.FailOnThreadViolationRepaintManager;
 import org.assertj.swing.edt.GuiActionRunner;
@@ -15,7 +17,7 @@ class ApplicationTest {
     private FrameFixture frameFixture;
 
     @BeforeAll
-    public static void setupOnce() {
+    static void setupOnce() {
         FailOnThreadViolationRepaintManager.install();
     }
 
@@ -40,5 +42,12 @@ class ApplicationTest {
     void graphicsAreInitialized() {
         JPanel panel = frameFixture.panel("TrainPanel").target();
         assertNotNull(panel.getGraphics());
+    }
+
+    @Test
+    void mouseListenerAttached() {
+        JPanel panel = frameFixture.panel("TrainPanel").target();
+        assertNotNull(panel.getMouseListeners());
+        assertEquals(1, panel.getMouseListeners().length);
     }
 }
