@@ -36,7 +36,7 @@ public enum LineCode {
             case BL -> "Blue";
             case OR -> "Orange";
             case SV -> "Silver";
-            case NULL -> "-";
+            case NULL -> Constants.EMPTY_DETAIL;
         };
     }
 }

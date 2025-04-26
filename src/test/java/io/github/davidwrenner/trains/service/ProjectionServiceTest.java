@@ -1,5 +1,5 @@
 /* * * * * Copyright (c) 2024 David Wrenner * * * * */
-package io.github.davidwrenner.trains.ui.pixel;
+package io.github.davidwrenner.trains.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -10,29 +10,35 @@ import io.github.davidwrenner.trains.config.Constants;
 import io.github.davidwrenner.trains.pojo.Coordinate;
 import io.github.davidwrenner.trains.pojo.StandardRoutes;
 import io.github.davidwrenner.trains.pojo.Stations;
-import io.github.davidwrenner.trains.service.StandardRouteService;
-import io.github.davidwrenner.trains.service.StationListService;
+import io.github.davidwrenner.trains.pojo.TrainPosition;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class ProjectorTest {
+class ProjectionServiceTest {
 
-    private Projector projector;
+    private ProjectionService projectionService;
+
+    private StationListService stationListService;
+    private StandardRouteService standardRouteService;
+    private TrainPositionService trainPositionService;
 
     @BeforeEach
     void setup() {
-        projector = new Projector();
+        TestingUtils.useMockServices();
+        projectionService = new ProjectionService();
+
+        stationListService = new StationListService();
+        standardRouteService = new StandardRouteService();
+        trainPositionService = new TrainPositionService();
     }
 
     @Test
     void buildStationCoordinateMap_Happy() {
-        TestingUtils.useMockServices();
-        StationListService stationListService = new StationListService();
         Stations stations = stationListService.getStations();
 
-        Map<String, Coordinate> coordinates = projector.buildStationCoordinateMap(
+        Map<String, Coordinate> coordinates = projectionService.buildStationCoordinateMap(
                 stations, Constants.GRID_WIDTH_PIXELS, Constants.GRID_HEIGHT_PIXELS);
 
         assertNotNull(coordinates);
@@ -44,7 +50,7 @@ class ProjectorTest {
 
     @Test
     void buildStationCoordinateMap_Empty() {
-        Map<String, Coordinate> coordinates = projector.buildStationCoordinateMap(
+        Map<String, Coordinate> coordinates = projectionService.buildStationCoordinateMap(
                 new Stations(List.of()), Constants.GRID_WIDTH_PIXELS, Constants.GRID_HEIGHT_PIXELS);
         assertNotNull(coordinates);
         assertTrue(coordinates.isEmpty());
@@ -52,16 +58,13 @@ class ProjectorTest {
 
     @Test
     void buildCircuitIdCoordinateMap_Happy() {
-        TestingUtils.useMockServices();
-        StationListService stationListService = new StationListService();
-        StandardRouteService standardRouteService = new StandardRouteService();
         Stations stations = stationListService.getStations();
         StandardRoutes standardRoutes = standardRouteService.getStandardRoutes();
-        Map<String, Coordinate> stationCoordinates = projector.buildStationCoordinateMap(
+        Map<String, Coordinate> stationCoordinates = projectionService.buildStationCoordinateMap(
                 stations, Constants.GRID_WIDTH_PIXELS, Constants.GRID_HEIGHT_PIXELS);
 
         Map<Integer, Coordinate> circuitIdCoordinates =
-                projector.buildCircuitIdCoordinateMap(stationCoordinates, standardRoutes);
+                projectionService.buildCircuitIdCoordinateMap(stationCoordinates, standardRoutes);
 
         assertNotNull(circuitIdCoordinates);
         assertEquals(3170, circuitIdCoordinates.size());
@@ -73,15 +76,33 @@ class ProjectorTest {
     @Test
     void buildCircuitIdCoordinateMap_NullStationCoordinates() {
         Map<Integer, Coordinate> coordinates =
-                projector.buildCircuitIdCoordinateMap(null, new StandardRoutes(List.of()));
+                projectionService.buildCircuitIdCoordinateMap(null, new StandardRoutes(List.of()));
         assertNotNull(coordinates);
         assertTrue(coordinates.isEmpty());
     }
 
     @Test
     void buildCircuitIdCoordinateMap_NullRoutes() {
-        Map<Integer, Coordinate> coordinates = projector.buildCircuitIdCoordinateMap(Map.of(), null);
+        Map<Integer, Coordinate> coordinates = projectionService.buildCircuitIdCoordinateMap(Map.of(), null);
         assertNotNull(coordinates);
         assertTrue(coordinates.isEmpty());
+    }
+
+    @Test
+    void nextStopForwardIteration() {
+        TrainPosition trainPosition =
+                trainPositionService.getTrainPositions().trainPositions().get(84);
+        StandardRoutes standardRoutes = standardRouteService.getStandardRoutes();
+
+        assertEquals("K05", projectionService.computeNextStation(trainPosition, standardRoutes));
+    }
+
+    @Test
+    void nextStopBackwardIteration() {
+        TrainPosition trainPosition =
+                trainPositionService.getTrainPositions().trainPositions().get(88);
+        StandardRoutes standardRoutes = standardRouteService.getStandardRoutes();
+
+        assertEquals("N06", projectionService.computeNextStation(trainPosition, standardRoutes));
     }
 }

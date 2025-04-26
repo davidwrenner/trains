@@ -22,7 +22,7 @@ public class Application {
 
     public static void main(String[] args) {
         if (Constants.API_KEY == null) {
-            logger.error("Api key is required");
+            logger.fatal("Api key is required");
             return;
         }
         SwingUtilities.invokeLater(Application::new);

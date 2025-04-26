@@ -3,6 +3,7 @@ package io.github.davidwrenner.trains.ui.swing;
 
 import io.github.davidwrenner.trains.config.Constants;
 import io.github.davidwrenner.trains.pojo.*;
+import io.github.davidwrenner.trains.service.ProjectionService;
 import io.github.davidwrenner.trains.service.StandardRouteService;
 import io.github.davidwrenner.trains.service.StationListService;
 import io.github.davidwrenner.trains.service.TrainPositionService;
@@ -10,7 +11,6 @@ import io.github.davidwrenner.trains.ui.component.StationDetailComponent;
 import io.github.davidwrenner.trains.ui.component.TrainDetailComponent;
 import io.github.davidwrenner.trains.ui.pixel.EmptyPixel;
 import io.github.davidwrenner.trains.ui.pixel.Pixel;
-import io.github.davidwrenner.trains.ui.pixel.Projector;
 import io.github.davidwrenner.trains.ui.pixel.StationPixel;
 import io.github.davidwrenner.trains.ui.pixel.TrainPixel;
 import java.awt.*;
@@ -29,7 +29,7 @@ public class TrainPanel extends JPanel implements ActionListener {
 
     private static final Logger logger = LogManager.getLogger();
 
-    private final Projector projector;
+    private final ProjectionService projectionService;
 
     private final TrainPositionService trainPositionService;
 
@@ -58,7 +58,7 @@ public class TrainPanel extends JPanel implements ActionListener {
     public TrainPanel() {
         super();
 
-        this.projector = new Projector();
+        this.projectionService = new ProjectionService();
         this.trainPositionService = new TrainPositionService();
         this.standardRouteService = new StandardRouteService();
         this.stationListService = new StationListService();
@@ -73,10 +73,10 @@ public class TrainPanel extends JPanel implements ActionListener {
         this.trainPositions = null;
         this.stations = this.stationListService.getStations();
         this.standardRoutes = this.standardRouteService.getStandardRoutes();
-        this.stationCoordinates = this.projector.buildStationCoordinateMap(
+        this.stationCoordinates = this.projectionService.buildStationCoordinateMap(
                 this.stations, Constants.GRID_WIDTH_PIXELS, Constants.GRID_HEIGHT_PIXELS);
         this.circuitIdCoordinates =
-                this.projector.buildCircuitIdCoordinateMap(this.stationCoordinates, this.standardRoutes);
+                this.projectionService.buildCircuitIdCoordinateMap(this.stationCoordinates, this.standardRoutes);
 
         this.userSelectedTrain = Optional.empty();
         this.userSelectedStation = Optional.empty();
@@ -175,14 +175,15 @@ public class TrainPanel extends JPanel implements ActionListener {
             return;
         }
 
-        logger.warn("HERE {} {}", this.userSelectedStation, this.userSelectedTrain);
-
         final TrainPosition trainPosition = this.userSelectedTrain.get();
+
+        final String nextStation = this.projectionService.computeNextStation(trainPosition, this.standardRoutes);
 
         final TrainDetailComponent component = TrainDetailComponent.builder()
                 .trainNumber(trainPosition.trainNumber())
                 .lineCode(trainPosition.lineCode().toString())
                 .destination(this.stationCodeToName(trainPosition.destinationStationCode()))
+                .nextStop(this.stationCodeToName(nextStation))
                 .numCars(trainPosition.carCount())
                 .type(trainPosition.serviceType())
                 .build();
@@ -198,7 +199,7 @@ public class TrainPanel extends JPanel implements ActionListener {
         final Station station = this.userSelectedStation.get();
 
         Set<LineCode> linesServed = new HashSet<>();
-        this.allKnownAliasesOf(station).forEach(a -> {
+        this.knownAliasesOf(station).forEach(a -> {
             linesServed.add(a.lineCode1());
             linesServed.add(a.lineCode2());
             linesServed.add(a.lineCode3());
@@ -211,10 +212,10 @@ public class TrainPanel extends JPanel implements ActionListener {
                         .filter(lineCode -> lineCode != LineCode.NULL)
                         .map(LineCode::toString)
                         .sorted()
-                        .collect(Collectors.joining(", ")))
+                        .collect(Collectors.joining(Constants.DETAIL_DELIMITER)))
                 .address(String.join(
-                        ", ",
-                        station.address().city().stripLeading(),
+                        Constants.DETAIL_DELIMITER,
+                        station.address().city(),
                         station.address().state()))
                 .build();
 
@@ -274,17 +275,17 @@ public class TrainPanel extends JPanel implements ActionListener {
 
     private String stationCodeToName(String stationCode) {
         if (stationCode == null) {
-            return "-";
+            return Constants.EMPTY_DETAIL;
         }
 
         return this.stations.stations().stream()
                 .filter(s -> stationCode.equals(s.code()))
                 .map(Station::name)
                 .findFirst()
-                .orElse("-");
+                .orElse(Constants.EMPTY_DETAIL);
     }
 
-    private List<Station> allKnownAliasesOf(Station station) {
+    private List<Station> knownAliasesOf(Station station) {
         List<Station> aliases = new ArrayList<>();
         aliases.add(station);
 

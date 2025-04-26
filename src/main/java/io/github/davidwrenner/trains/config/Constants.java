@@ -7,6 +7,9 @@ public class Constants {
 
     private Constants() {}
 
+    public static final String EMPTY_DETAIL = "-";
+    public static final String DETAIL_DELIMITER = ", ";
+
     // Colors
     public static final Color DARKER_ORANGE = new Color(255, 102, 0);
     public static final Color SILVER = new Color(153, 153, 153);
