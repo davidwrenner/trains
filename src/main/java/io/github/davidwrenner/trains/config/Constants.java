@@ -27,7 +27,7 @@ public class Constants {
     public static final int PIXEL_HEIGHT_PX = PIXEL_WIDTH_PX;
     public static final int PANEL_WIDTH_PX = 800;
     public static final int PANEL_HEIGHT_PX = 600;
-    public static final int EQUALITY_TOLERANCE_PX_INCLUSIVE = 2;
+    public static final int EQUALITY_TOLERANCE_PX_INCLUSIVE = 1;
     public static final int GRID_WIDTH_PIXELS = Math.ceilDiv(PANEL_WIDTH_PX, PIXEL_WIDTH_PX);
     public static final int GRID_HEIGHT_PIXELS = Math.ceilDiv(PANEL_HEIGHT_PX, PIXEL_HEIGHT_PX);
 

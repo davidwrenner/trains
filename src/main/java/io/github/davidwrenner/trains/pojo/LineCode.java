@@ -1,16 +1,19 @@
 /* * * * * Copyright (c) 2024 David Wrenner * * * * */
 package io.github.davidwrenner.trains.pojo;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import io.github.davidwrenner.trains.config.Constants;
 import java.awt.*;
 
+@JsonDeserialize(using = LineCodeDeserializer.class)
 public enum LineCode {
     RD,
     YL,
     GR,
     BL,
     OR,
-    SV;
+    SV,
+    NULL;
 
     public Color toColor() {
         return switch (this) {
@@ -20,6 +23,7 @@ public enum LineCode {
             case BL -> Constants.BRIGHTER_BLUE;
             case OR -> Constants.DARKER_ORANGE;
             case SV -> Constants.SILVER;
+            case NULL -> Color.BLACK;
         };
     }
 
@@ -32,6 +36,7 @@ public enum LineCode {
             case BL -> "Blue";
             case OR -> "Orange";
             case SV -> "Silver";
+            case NULL -> "-";
         };
     }
 }
