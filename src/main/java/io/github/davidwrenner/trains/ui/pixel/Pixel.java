@@ -1,5 +1,5 @@
 /* * * * * Copyright (c) 2024 David Wrenner * * * * */
-package io.github.davidwrenner.trains.ui;
+package io.github.davidwrenner.trains.ui.pixel;
 
 import java.awt.Graphics2D;
 

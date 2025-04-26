@@ -2,8 +2,9 @@
 package io.github.davidwrenner.trains;
 
 import io.github.davidwrenner.trains.config.Constants;
-import io.github.davidwrenner.trains.ui.TrainFrame;
-import io.github.davidwrenner.trains.ui.TrainPanel;
+import io.github.davidwrenner.trains.ui.swing.MouseListener;
+import io.github.davidwrenner.trains.ui.swing.TrainFrame;
+import io.github.davidwrenner.trains.ui.swing.TrainPanel;
 import java.awt.*;
 import javax.swing.*;
 import org.apache.logging.log4j.LogManager;
@@ -35,7 +36,8 @@ public class Application {
         TrainPanel panel = new TrainPanel();
         panel.setName("TrainPanel");
         panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        panel.setPreferredSize(new Dimension(Constants.WIDTH_PX, Constants.HEIGHT_PX));
+        panel.setPreferredSize(new Dimension(Constants.PANEL_WIDTH_PX, Constants.PANEL_HEIGHT_PX));
+        panel.addMouseListener(new MouseListener(panel));
 
         frame = new TrainFrame();
         frame.setTitle("Trains");

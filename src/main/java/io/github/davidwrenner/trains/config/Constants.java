@@ -19,12 +19,17 @@ public class Constants {
     // Timing
     public static final int REFRESH_DELAY_MS = 4000; // Train position data source refreshed every 7-10s
 
-    // Pixel maths
-    public static final int PIXEL_WIDTH = 4;
-    public static final int WIDTH_PX = 800;
-    public static final int HEIGHT_PX = 600;
-    public static final int GRID_WIDTH_PIXELS = Math.ceilDiv(WIDTH_PX, PIXEL_WIDTH);
-    public static final int GRID_HEIGHT_PIXELS = Math.ceilDiv(HEIGHT_PX, PIXEL_WIDTH);
+    /* Pixel maths
+    _PX -> computer pixels
+    _PIXELS -> unit size of grid entities - trains, stations, etc.
+    */
+    public static final int PIXEL_WIDTH_PX = 4;
+    public static final int PIXEL_HEIGHT_PX = PIXEL_WIDTH_PX;
+    public static final int PANEL_WIDTH_PX = 800;
+    public static final int PANEL_HEIGHT_PX = 600;
+    public static final int EQUALITY_TOLERANCE_PX_INCLUSIVE = 2;
+    public static final int GRID_WIDTH_PIXELS = Math.ceilDiv(PANEL_WIDTH_PX, PIXEL_WIDTH_PX);
+    public static final int GRID_HEIGHT_PIXELS = Math.ceilDiv(PANEL_HEIGHT_PX, PIXEL_HEIGHT_PX);
 
     // URIs
     public static final String TRAIN_POSITIONS_URI =
