@@ -208,7 +208,7 @@ public class TrainPanel extends JPanel implements ActionListener {
         final StationDetailComponent component = StationDetailComponent.builder()
                 .name(station.name())
                 .linesServed(linesServed.stream()
-                        .filter(Objects::nonNull)
+                        .filter(lineCode -> lineCode != LineCode.NULL)
                         .map(LineCode::toString)
                         .sorted()
                         .collect(Collectors.joining(", ")))
@@ -228,20 +228,6 @@ public class TrainPanel extends JPanel implements ActionListener {
             return;
         }
 
-        for (Station station : this.stations.stations()) {
-            final Coordinate candidate = this.stationCoordinates.get(station.code());
-            if (candidate == null) {
-                continue;
-            }
-
-            if (this.hasApproximatelyEqualCoordinates.test(coordinate, this.scalePixelsToPx(candidate))) {
-                this.userSelectedStation = Optional.of(station);
-                this.userSelectedTrain = Optional.empty();
-                super.repaint();
-                return;
-            }
-        }
-
         for (TrainPosition trainPosition : this.trainPositions.trainPositions()) {
             final Coordinate candidate = this.circuitIdCoordinates.get(trainPosition.circuitId());
             if (candidate == null) {
@@ -251,6 +237,20 @@ public class TrainPanel extends JPanel implements ActionListener {
             if (this.hasApproximatelyEqualCoordinates.test(coordinate, this.scalePixelsToPx(candidate))) {
                 this.userSelectedTrain = Optional.of(trainPosition);
                 this.userSelectedStation = Optional.empty();
+                super.repaint();
+                return;
+            }
+        }
+
+        for (Station station : this.stations.stations()) {
+            final Coordinate candidate = this.stationCoordinates.get(station.code());
+            if (candidate == null) {
+                continue;
+            }
+
+            if (this.hasApproximatelyEqualCoordinates.test(coordinate, this.scalePixelsToPx(candidate))) {
+                this.userSelectedStation = Optional.of(station);
+                this.userSelectedTrain = Optional.empty();
                 super.repaint();
                 return;
             }
@@ -273,6 +273,10 @@ public class TrainPanel extends JPanel implements ActionListener {
                     && c1.y() <= c2.y() + Constants.PIXEL_HEIGHT_PX + Constants.EQUALITY_TOLERANCE_PX_INCLUSIVE;
 
     private String stationCodeToName(String stationCode) {
+        if (stationCode == null) {
+            return "-";
+        }
+
         return this.stations.stations().stream()
                 .filter(s -> stationCode.equals(s.code()))
                 .map(Station::name)
