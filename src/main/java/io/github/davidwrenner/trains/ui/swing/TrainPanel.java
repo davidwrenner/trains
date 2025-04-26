@@ -6,6 +6,7 @@ import io.github.davidwrenner.trains.pojo.*;
 import io.github.davidwrenner.trains.service.StandardRouteService;
 import io.github.davidwrenner.trains.service.StationListService;
 import io.github.davidwrenner.trains.service.TrainPositionService;
+import io.github.davidwrenner.trains.ui.component.StationDetailComponent;
 import io.github.davidwrenner.trains.ui.component.TrainDetailComponent;
 import io.github.davidwrenner.trains.ui.pixel.EmptyPixel;
 import io.github.davidwrenner.trains.ui.pixel.Pixel;
@@ -15,10 +16,12 @@ import io.github.davidwrenner.trains.ui.pixel.TrainPixel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.List;
 import java.util.function.BiPredicate;
+import java.util.stream.Collectors;
 import javax.swing.*;
+import javax.swing.Timer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -48,6 +51,8 @@ public class TrainPanel extends JPanel implements ActionListener {
 
     private Optional<TrainPosition> userSelectedTrain;
 
+    private Optional<Station> userSelectedStation;
+
     private Pixel[][] grid;
 
     public TrainPanel() {
@@ -74,6 +79,7 @@ public class TrainPanel extends JPanel implements ActionListener {
                 this.projector.buildCircuitIdCoordinateMap(this.stationCoordinates, this.standardRoutes);
 
         this.userSelectedTrain = Optional.empty();
+        this.userSelectedStation = Optional.empty();
 
         this.timer.start();
         this.refreshGrid();
@@ -82,6 +88,10 @@ public class TrainPanel extends JPanel implements ActionListener {
 
     public Optional<TrainPosition> getUserSelectedTrain() {
         return this.userSelectedTrain;
+    }
+
+    public Optional<Station> getUserSelectedStation() {
+        return this.userSelectedStation;
     }
 
     public Pixel[][] getGrid() {
@@ -99,6 +109,7 @@ public class TrainPanel extends JPanel implements ActionListener {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         this.drawGrid((Graphics2D) g);
+        this.drawStationDetailPanel((Graphics2D) g);
         this.drawTrainDetailPanel((Graphics2D) g);
     }
 
@@ -160,9 +171,11 @@ public class TrainPanel extends JPanel implements ActionListener {
     }
 
     private void drawTrainDetailPanel(Graphics2D g2d) {
-        if (this.userSelectedTrain.isEmpty()) {
+        if (this.userSelectedTrain.isEmpty() || this.userSelectedTrain.get().lineCode() == null) {
             return;
         }
+
+        logger.warn("HERE {} {}", this.userSelectedStation, this.userSelectedTrain);
 
         final TrainPosition trainPosition = this.userSelectedTrain.get();
 
@@ -177,10 +190,56 @@ public class TrainPanel extends JPanel implements ActionListener {
         component.draw(g2d);
     }
 
-    public void handleMousePressed(Coordinate coordinate) {
-        if (this.trainPositions == null) {
-            this.userSelectedTrain = Optional.empty();
+    public void drawStationDetailPanel(Graphics2D g2d) {
+        if (this.userSelectedStation.isEmpty()) {
             return;
+        }
+
+        final Station station = this.userSelectedStation.get();
+
+        Set<LineCode> linesServed = new HashSet<>();
+        this.allKnownAliasesOf(station).forEach(a -> {
+            linesServed.add(a.lineCode1());
+            linesServed.add(a.lineCode2());
+            linesServed.add(a.lineCode3());
+            linesServed.add(a.lineCode4());
+        });
+
+        final StationDetailComponent component = StationDetailComponent.builder()
+                .name(station.name())
+                .linesServed(linesServed.stream()
+                        .filter(Objects::nonNull)
+                        .map(LineCode::toString)
+                        .sorted()
+                        .collect(Collectors.joining(", ")))
+                .address(String.join(
+                        ", ",
+                        station.address().city().stripLeading(),
+                        station.address().state()))
+                .build();
+
+        component.draw(g2d);
+    }
+
+    public void handleMousePressed(Coordinate coordinate) {
+        if (this.trainPositions == null || this.stations == null) {
+            this.userSelectedTrain = Optional.empty();
+            this.userSelectedStation = Optional.empty();
+            return;
+        }
+
+        for (Station station : this.stations.stations()) {
+            final Coordinate candidate = this.stationCoordinates.get(station.code());
+            if (candidate == null) {
+                continue;
+            }
+
+            if (this.hasApproximatelyEqualCoordinates.test(coordinate, this.scalePixelsToPx(candidate))) {
+                this.userSelectedStation = Optional.of(station);
+                this.userSelectedTrain = Optional.empty();
+                super.repaint();
+                return;
+            }
         }
 
         for (TrainPosition trainPosition : this.trainPositions.trainPositions()) {
@@ -191,12 +250,14 @@ public class TrainPanel extends JPanel implements ActionListener {
 
             if (this.hasApproximatelyEqualCoordinates.test(coordinate, this.scalePixelsToPx(candidate))) {
                 this.userSelectedTrain = Optional.of(trainPosition);
+                this.userSelectedStation = Optional.empty();
                 super.repaint();
                 return;
             }
         }
 
         this.userSelectedTrain = Optional.empty();
+        this.userSelectedStation = Optional.empty();
         super.repaint();
     }
 
@@ -217,5 +278,22 @@ public class TrainPanel extends JPanel implements ActionListener {
                 .map(Station::name)
                 .findFirst()
                 .orElse("-");
+    }
+
+    private List<Station> allKnownAliasesOf(Station station) {
+        List<Station> aliases = new ArrayList<>();
+        aliases.add(station);
+
+        this.stations.stations().stream()
+                .filter(s -> s.code().equals(station.stationTogether1()))
+                .findFirst()
+                .ifPresent(aliases::add);
+
+        this.stations.stations().stream()
+                .filter(s -> s.code().equals(station.stationTogether2()))
+                .findFirst()
+                .ifPresent(aliases::add);
+
+        return aliases;
     }
 }

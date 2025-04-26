@@ -19,6 +19,10 @@ class TrainPanelTest {
 
     private TrainPanel panel;
 
+    private final Coordinate stationCoordinate = new Coordinate(53, 284);
+    private final Coordinate trainCoordinate = new Coordinate(510, 300);
+    private final Coordinate emptyCoordinate = new Coordinate(1, 1);
+
     @BeforeEach
     void setup() {
         TestingUtils.useMockServices();
@@ -37,19 +41,53 @@ class TrainPanelTest {
     }
 
     @Test
+    void noSelectedStationOnLoad() {
+        assertTrue(panel.getUserSelectedStation().isEmpty());
+    }
+
+    @Test
+    void handleMousePressedOnStation() {
+        panel.handleMousePressed(stationCoordinate);
+        assertTrue(panel.getUserSelectedStation().isPresent());
+    }
+
+    @Test
     void noSelectedTrainOnLoad() {
         assertTrue(panel.getUserSelectedTrain().isEmpty());
     }
 
     @Test
     void handleMousePressedOnTrain() {
-        panel.handleMousePressed(new Coordinate(510, 300));
+        panel.handleMousePressed(trainCoordinate);
         assertTrue(panel.getUserSelectedTrain().isPresent());
     }
 
     @Test
-    void handleMousePressedOnEmptyPixel() {
-        panel.handleMousePressed(new Coordinate(1, 1));
+    void stationDetailLocksOutTrainDetail() {
+        panel.handleMousePressed(trainCoordinate);
+
+        panel.handleMousePressed(stationCoordinate);
+
+        assertTrue(panel.getUserSelectedStation().isPresent());
+        assertTrue(panel.getUserSelectedTrain().isEmpty());
+    }
+
+    @Test
+    void trainDetailLocksOutStationDetail() {
+        panel.handleMousePressed(stationCoordinate);
+
+        panel.handleMousePressed(trainCoordinate);
+
+        assertTrue(panel.getUserSelectedTrain().isPresent());
+        assertTrue(panel.getUserSelectedStation().isEmpty());
+    }
+
+    @Test
+    void emptyPixelLocksOutDetail() {
+        panel.handleMousePressed(trainCoordinate);
+
+        panel.handleMousePressed(emptyCoordinate);
+
         assertTrue(panel.getUserSelectedTrain().isEmpty());
     }
 }

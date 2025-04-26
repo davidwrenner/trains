@@ -21,15 +21,12 @@ class MouseListenerTest {
         mouseListener = new MouseListener(panelSpy);
     }
 
-    @Test
-    void mousePressed() {
+    private MouseEvent simulateClick(int x, int y) {
         final long now = System.currentTimeMillis();
-        final int x = 1;
-        final int y = 1;
         final int modifiers = 0;
         final int numClicks = 1;
         final boolean popupTrigger = false;
-        final MouseEvent press = new MouseEvent(
+        return new MouseEvent(
                 new TrainPanel(),
                 MouseEvent.MOUSE_PRESSED,
                 now,
@@ -39,6 +36,13 @@ class MouseListenerTest {
                 numClicks,
                 popupTrigger,
                 MouseEvent.NOBUTTON);
+    }
+
+    @Test
+    void mousePressed() {
+        final int x = 1;
+        final int y = 1;
+        MouseEvent press = this.simulateClick(x, y);
 
         mouseListener.mousePressed(press);
 
