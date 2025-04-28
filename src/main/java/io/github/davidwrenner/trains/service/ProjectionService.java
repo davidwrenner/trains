@@ -1,12 +1,13 @@
 /* * * * * Copyright (c) 2024 David Wrenner * * * * */
-package io.github.davidwrenner.trains.ui.pixel;
+package io.github.davidwrenner.trains.service;
 
 import io.github.davidwrenner.trains.pojo.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
-public class Projector {
+public class ProjectionService {
 
     public Map<Integer, Coordinate> buildCircuitIdCoordinateMap(
             Map<String, Coordinate> stationCoordinates, StandardRoutes standardRoutes) {
@@ -119,5 +120,69 @@ public class Projector {
         }
 
         return result;
+    }
+
+    public String computeNextStation(TrainPosition trainPosition, StandardRoutes standardRoutes) {
+        if (standardRoutes == null
+                || trainPosition.destinationStationCode() == null
+                || trainPosition.circuitId() == null) {
+            return null;
+        }
+
+        Optional<StandardRoute> route = standardRoutes.standardRoutes().stream()
+                .filter(r -> this.isCircuitIdInRoute(trainPosition.circuitId(), r))
+                .findFirst();
+
+        if (route.isEmpty()) {
+            return null;
+        }
+
+        if (this.iterateForward(trainPosition, route.get())) {
+            return this.computeNextStation(trainPosition, route.get().trackCircuits());
+        } else {
+            return this.computeNextStation(
+                    trainPosition, route.get().trackCircuits().reversed());
+        }
+    }
+
+    private boolean isCircuitIdInRoute(Integer trackCircuit, StandardRoute standardRoute) {
+        for (TrackCircuit tc : standardRoute.trackCircuits()) {
+            if (trackCircuit.equals(tc.circuitId())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean iterateForward(TrainPosition trainPosition, StandardRoute standardRoute) {
+        String destinationCode = trainPosition.destinationStationCode();
+        for (TrackCircuit tc : standardRoute.trackCircuits()) {
+            if (destinationCode.equals(tc.stationCode())) {
+                return false;
+            } else if (trainPosition.circuitId().equals(tc.circuitId())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String computeNextStation(TrainPosition trainPosition, List<TrackCircuit> trackCircuits) {
+        if (trackCircuits == null) {
+            return null;
+        }
+
+        boolean hasIterationReachedPosition = false;
+
+        for (TrackCircuit tc : trackCircuits) {
+            if (trainPosition.circuitId().equals(tc.circuitId())) {
+                hasIterationReachedPosition = true;
+            }
+
+            if (hasIterationReachedPosition && tc.stationCode() != null) {
+                return tc.stationCode();
+            }
+        }
+
+        return null;
     }
 }

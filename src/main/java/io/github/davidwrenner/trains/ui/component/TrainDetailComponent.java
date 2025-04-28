@@ -10,6 +10,7 @@ public class TrainDetailComponent implements Component {
     private final String trainNumber;
     private final String lineCode;
     private final String destination;
+    private final String nextStop;
     private final Integer numCars;
     private final String type;
 
@@ -17,6 +18,7 @@ public class TrainDetailComponent implements Component {
         this.trainNumber = builder.trainNumber;
         this.lineCode = builder.lineCode;
         this.destination = builder.destination;
+        this.nextStop = builder.nextStop;
         this.numCars = builder.numCars;
         this.type = builder.type;
     }
@@ -30,6 +32,7 @@ public class TrainDetailComponent implements Component {
         private String trainNumber;
         private String lineCode;
         private String destination;
+        private String nextStop;
         private Integer numCars;
         private String type;
 
@@ -47,6 +50,11 @@ public class TrainDetailComponent implements Component {
 
         public TrainDetailBuilder destination(String destination) {
             this.destination = destination;
+            return this;
+        }
+
+        public TrainDetailBuilder nextStop(String nextStop) {
+            this.nextStop = nextStop;
             return this;
         }
 
@@ -74,6 +82,7 @@ public class TrainDetailComponent implements Component {
         details.put("Train", this.trainNumber);
         details.put("Line", this.lineCode);
         details.put("Dest", this.destination);
+        details.put("Next", this.nextStop);
         details.put("Cars", this.numCars);
         details.put("Type", this.type);
 
